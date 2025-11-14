@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <!-- CHATBOT -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <title>Inicio - Ferretería Watajai</title>
+</head>
+<body class="bg-gray-100 min-h-screen p-0">
+
+    <!-- HEADER -->
+    <header class="w-full bg-gradient-to-r from-black via-gray-900 to-[#ff751f] text-white py-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
+            <h1 class="text-2xl font-bold tracking-wide">Ferretería Watajai</h1>
+            <nav class="space-x-6 text-lg hidden md:block">
+                <a href="/" class="hover:text-[#ff751f] transition">Inicio</a>
+                <a href="/catalogo" class="hover:text-[#ff751f] transition">Catálogo</a>
+                <a href="/carrito" class="hover:text-[#ff751f] transition">Carrito</a>
+                <a href="/contacto" class="hover:text-[#ff751f] transition">Contacto</a>
+            </nav>
+            {% if session.usuario_id %}
+            <div class="relative group">
+            <button class="bg-[#ff751f] px-4 py-2 rounded-lg text-white hover:bg-orange-600 transition">
+            Perfil
+            </button>
+            <div class="absolute right-0 mt-2 bg-white text-black rounded-lg shadow-lg w-40 py-2 opacity-0 group-hover:opacity-100 transition">
+            <a href="/perfil" class="block px-4 py-2 hover:bg-gray-100">Ver Perfil</a>
+            <a href="/logout" class="block px-4 py-2 hover:bg-gray-100 text-red-600">Cerrar sesión</a>
+            </div>
+            </div>
+            {% endif %}
+            {% if session.usuario_id %}
+    {% if usuario and usuario.rol == 'admin' %}
+        <a href="/admin" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
+            Admin
+        </a>
+    {% endif %}
+{% endif %}
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="w-full bg-gradient-to-r from-[#ff751f] via-gray-900 to-black text-white py-20">
+        <div class="max-w-7xl mx-auto text-center px-6">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Todo lo que necesitás para tu proyecto</h1>
+            <p class="text-lg md:text-xl text-gray-200 max-w-2xl mx-auto">
+                Herramientas, materiales, accesorios y más. Calidad garantizada y entregas rápidas.
+            </p>
+            <a href="/catalogo" class="mt-6 inline-block bg-[#ff751f] hover:bg-orange-600 text-white px-8 py-3 rounded-xl text-lg font-semibold transition">
+                Ver Catálogo
+            </a>
+        </div>
+    </section>
+
+    <!-- DESTACADOS -->
+    <section class="max-w-7xl mx-auto px-6 mt-12">
+        <h2 class="text-3xl font-bold text-center mb-8">Productos Destacados</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for producto in productos[:4] %}
+            <div class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition">
+                <div class="h-40 rounded-lg overflow-hidden bg-gray-200 flex items-center justify-center">
+                    <img src="{{ producto.imagen_url or '/static/img/sin_imagen.jpg' }}" class="w-full h-full object-cover">
+                </div>
+                <h2 class="text-lg font-semibold mt-3">{{ producto.nombre }}</h2>
+                <p class="text-sm text-gray-600">{{ producto.descripcion }}</p>
+                <p class="mt-2 font-bold text-green-600">${{ producto.precio }}</p>
+                <p class="text-sm text-gray-500 mt-1">Stock: {{ producto.stock }}</p>
+                <form action="/agregar_carrito/{{ producto.id }}" method="POST">
+                    <label class="block text-sm mb-1">Cantidad:</label>
+                    <input name="cantidad" type="number" value="1" min="1" max="{{ producto.stock }}" class="w-full mb-3 border rounded-lg p-2" />
+                    <button class="mt-3 w-full bg-[#ff751f] text-white py-2 rounded-lg hover:bg-[#BE4103]">Agregar al carrito</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="w-full mt-16 bg-gradient-to-r from-[#ff751f] via-gray-900 to-black text-white py-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 px-6 text-center md:text-left">
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Ferretería Watajai</h2>
+                <p class="text-sm text-gray-300">Herramientas y materiales de construcción al mejor precio.</p>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Enlaces</h2>
+                <ul class="text-gray-300 space-y-1">
+                    <li><a href="/" class="hover:text-[#ff751f] transition">Inicio</a></li>
+                    <li><a href="/catalogo" class="hover:text-[#ff751f] transition">Catálogo</a></li>
+                    <li><a href="/carrito" class="hover:text-[#ff751f] transition">Carrito</a></li>
+                    <li><a href="/contacto" class="hover:text-[#ff751f] transition">Contacto</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2 class="text-lg font-semibold mb-2">Contacto</h2>
+                <p class="text-gray-300 text-sm">Managua, Nicaragua</p>
+                <p class="text-gray-300 text-sm">Tel: +505 8888-8888</p>
+                <p class="text-gray-300 text-sm">Email: yosoyandreabv@gmail.com</p>
+            </div>
+        </div>
+        <p class="text-center text-gray-400 text-sm mt-6">© 2025 Ferretería Watajai — Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>

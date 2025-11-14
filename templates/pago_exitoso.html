@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <title>Pago Exitoso</title>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+
+    <div class="bg-white shadow-xl rounded-2xl p-10 max-w-lg w-full text-center">
+        <div class="flex justify-center mb-6">
+            <div class="bg-green-100 text-green-600 w-20 h-20 flex items-center justify-center rounded-full text-5xl shadow">
+                ✓
+            </div>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">¡Pago realizado con éxito!</h1>
+        <p class="text-gray-600 text-lg mb-6">Gracias por tu compra. Tu pedido ha sido procesado correctamente.</p>
+
+        <div class="bg-orange-100 text-orange-800 p-4 rounded-xl mb-6 shadow-inner">
+            <p class="font-semibold">🎁 Sorpresa: ¡Tenemos nuevas ofertas esperándote!</p>
+            <p class="text-sm mt-1">Seguí explorando nuestra ferretería y aprovechá descuentos exclusivos.</p>
+        </div>
+
+        <div class="space-y-4">
+            <a href="/catalogo" class="block w-full bg-[#ff751f] text-white py-3 rounded-xl text-lg font-semibold hover:bg-orange-600 transition">Seguir comprando</a>
+
+            <a href="/" class="block w-full bg-gray-800 text-white py-3 rounded-xl text-lg font-semibold hover:bg-black transition">Volver al inicio</a>
+        </div>
+    </div>
+
+</body>
+</html>

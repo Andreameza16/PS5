@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <!-- CHATBOT -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <title>Carrito</title>
+</head>
+<body class="bg-gray-100">
+
+<header class="w-full bg-gradient-to-r from-black via-gray-900 to-[#ff751f] text-white py-4 shadow-lg">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
+        <h1 class="text-2xl font-bold tracking-wide">Ferretería Watajai</h1>
+        <nav class="space-x-6 text-lg hidden md:block">
+            <a href="/" class="hover:text-[#ff751f] transition">Inicio</a>
+            <a href="/catalogo" class="hover:text-[#ff751f] transition">Productos</a>
+            <a href="/carrito" class="hover:text-[#ff751f] transition">Carrito</a>
+            <a href="/contacto" class="hover:text-[#ff751f] transition">Contacto</a>
+        </nav>
+    </div>
+</header>
+
+<div class="max-w-5xl mx-auto mt-10 bg-white p-6 rounded-xl shadow-lg">
+
+    <h2 class="text-3xl font-bold mb-6">Tu Carrito</h2>
+
+    {% if items|length == 0 %}
+        <p class="text-gray-600 text-lg">Tu carrito está vacío.</p>
+        <a href="/catalogo" class="mt-4 inline-block bg-[#ff751f] hover:bg-[#BE5103] text-white px-6 py-2 rounded-lg">Seguir comprando</a>
+    {% else %}
+
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="p-3">Producto</th>
+                <th class="p-3">Precio</th>
+                <th class="p-3">Cantidad</th>
+                <th class="p-3">Subtotal</th>
+                <th class="p-3"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr class="border-b">
+                <td class="p-3">{{ item.producto.nombre }}</td>
+                <td class="p-3">${{ item.precio_unitario }}</td>
+                <td class="p-3">{{ item.cantidad }}</td>
+                <td class="p-3 font-bold">${{ item.cantidad * item.precio_unitario }}</td>
+                <td class="p-3">
+                    <a href="/eliminar_item/{{ item.id }}" class="text-red-600 hover:underline">
+                        Eliminar
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-right mt-6">
+        <h3 class="text-2xl font-bold">Total: ${{ total }}</h3>
+        <a href="/checkout" class="mt-4 inline-block bg-[#ff751f] text-white px-8 py-3 rounded-xl text-lg font-semibold hover:bg-orange-600">
+            Proceder al pago
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+</body>
+</html>

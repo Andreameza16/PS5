@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <title>Detalle del Pedido</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+<header class="bg-gradient-to-r from-black via-gray-900 to-[#ff751f] text-white py-4 shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 flex justify-between">
+        <h1 class="text-2xl font-bold">Detalle del Pedido</h1>
+        <a href="/admin/pedidos" class="text-white hover:text-[#ff751f]">Volver</a>
+    </div>
+</header>
+
+<div class="max-w-4xl mx-auto bg-white p-8 mt-10 rounded-xl shadow-lg">
+
+    <h2 class="text-2xl font-bold mb-4">Pedido #{{ pedido.id }}</h2>
+
+    <p><strong>Cliente:</strong> {{ pedido.usuario.nombre }}</p>
+    <p><strong>Correo:</strong> {{ pedido.usuario.email }}</p>
+    <p><strong>Dirección:</strong> {{ pedido.direccion_envio }}</p>
+    <p><strong>Estado:</strong> {{ pedido.estado }}</p>
+    <p><strong>Total:</strong> ${{ pedido.total }}</p>
+
+    <h3 class="text-xl font-bold mt-6 mb-3">Items del pedido</h3>
+
+    <table class="w-full text-left border-collapse">
+        <thead class="bg-gray-200">
+            <tr>
+                <th class="p-3">Producto</th>
+                <th class="p-3">Cantidad</th>
+                <th class="p-3">Precio Unitario</th>
+                <th class="p-3">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr class="border-b">
+                <td class="p-3">{{ item.producto.nombre }}</td>
+                <td class="p-3">{{ item.cantidad }}</td>
+                <td class="p-3">${{ item.precio_unitario }}</td>
+                <td class="p-3">${{ item.cantidad * item.precio_unitario }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

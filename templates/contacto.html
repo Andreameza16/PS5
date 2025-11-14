@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <!-- CHATBOT -->
+    <link href="https://cdn.jsdelivr.net/npm/@n8n/chat/dist/style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/chat.js') }}"></script>
+    <title>Contacto - Ferretería Watajai</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+    <!-- HEADER -->
+    <header class="w-full bg-gradient-to-r from-black via-gray-900 to-[#ff751f] text-white py-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between px-6">
+            <h1 class="text-2xl font-bold tracking-wide">Ferretería Watajai</h1>
+            <nav class="space-x-6 text-lg hidden md:block">
+                <a href="/" class="hover:text-[#ff751f] transition">Inicio</a>
+                <a href="/catalogo" class="hover:text-[#ff751f] transition">Catálogo</a>
+                <a href="/carrito" class="hover:text-[#ff751f] transition">Carrito</a>
+                <a href="/contacto" class="hover:text-[#ff751f] transition">Contacto</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-2 gap-10 p-6">
+
+        <!-- FORMULARIO -->
+        <div class="bg-white p-8 rounded-2xl shadow-lg">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Contáctanos</h2>
+            <p class="text-gray-600 mb-6">
+                ¿Tenés preguntas o necesitás ayuda? Envíanos un mensaje y te responderemos lo antes posible.
+            </p>
+
+            <form method="POST" action="/enviar_contacto" class="space-y-5">
+
+                <div>
+                    <label class="block font-semibold">Nombre</label>
+                    <input type="text" name="nombre" required
+                        class="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-[#ff751f]">
+                </div>
+
+                <div>
+                    <label class="block font-semibold">Correo</label>
+                    <input type="email" name="email" required
+                        class="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-[#ff751f]">
+                </div>
+
+                <div>
+                    <label class="block font-semibold">Mensaje</label>
+                    <textarea name="mensaje" rows="5" required
+                        class="w-full border rounded-lg p-3 mt-1 focus:ring-2 focus:ring-[#ff751f]"></textarea>
+                </div>
+                <br>
+               <button type="submit"
+        class="w-full bg-[#ff751f] text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition">
+        Enviar mensaje
+    </button>
+
+            </form>
+        </div>
+
+        <!-- INFO -->
+        <div class="flex flex-col justify-center space-y-8">
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Información de contacto</h3>
+                <p class="text-gray-600 mb-2"><strong>Dirección:</strong> Managua, Nicaragua</p>
+                <p class="text-gray-600 mb-2"><strong>Teléfono:</strong> +505 8888-8888</p>
+                <p class="text-gray-600 mb-2"><strong>Email:</strong> soporte@ferreteria.com</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 class="text-xl font-bold text-gray-800 mb-3">Horario de atención</h3>
+                <p class="text-gray-600">Lunes a Sábado: <strong>8:00 AM – 6:00 PM</strong></p>
+                <p class="text-gray-600">Domingo: <strong>Cerrado</strong></p>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

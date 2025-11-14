@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Icono -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='img/iconFerreteria.ico') }}">
+    <title>{% if modo == 'nuevo' %}Nuevo Producto{% else %}Editar Producto{% endif %}</title>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+
+<div class="max-w-3xl mx-auto bg-white p-8 rounded-xl mt-10 shadow-lg">
+
+    <h2 class="text-3xl font-bold mb-6">
+        {% if modo == 'nuevo' %}
+            Crear Nuevo Producto
+        {% else %}
+            Editar Producto
+        {% endif %}
+    </h2>
+
+    <form method="POST" class="space-y-5">
+
+        <div>
+            <label class="block font-semibold">Nombre</label>
+            <input type="text" name="nombre" value="{{ producto.nombre if producto else '' }}"
+                   class="w-full border rounded-lg p-2">
+        </div>
+
+        <div>
+            <label class="block font-semibold">SKU</label>
+            <input type="text" name="sku" value="{{ producto.sku if producto else '' }}"
+                   class="w-full border rounded-lg p-2">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Descripción</label>
+            <textarea name="descripcion" class="w-full border rounded-lg p-2" rows="3">
+                {{ producto.descripcion if producto else '' }}
+            </textarea>
+        </div>
+
+        <div>
+            <label class="block font-semibold">Precio</label>
+            <input type="number" step="0.01" name="precio" value="{{ producto.precio if producto else '' }}"
+                   class="w-full border rounded-lg p-2">
+        </div>
+
+        <div>
+            <label class="block font-semibold">Stock</label>
+            <input type="number" name="stock" value="{{ producto.stock if producto else '' }}"
+                   class="w-full border rounded-lg p-2">
+        </div>
+
+        <div>
+            <label class="block font-semibold">URL Imagen</label>
+            <input type="text" name="imagen_url" value="{{ producto.imagen_url if producto else '' }}"
+                   class="w-full border rounded-lg p-2">
+        </div>
+
+        <button class="bg-[#ff751f] text-white px-6 py-3 rounded-lg hover:bg-orange-600 transition">
+            Guardar
+        </button>
+
+        <a href="/admin/productos" class="ml-3 text-gray-600 hover:underline">Cancelar</a>
+
+    </form>
+
+</div>
+
+</body>
+</html>
