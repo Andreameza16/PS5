@@ -60,7 +60,3 @@ Incluye CRUD:
 - Vista de producto
 - Panel admin visualmente limpio
 
----
-
-## 🗂️ Estructura del Proyecto
-
