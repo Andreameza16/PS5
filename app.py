@@ -478,11 +478,17 @@ def crear_orden_paypal():
                       json=cuerpo, headers=headers)
 
     return r.json()
+from threading import Thread
+
+def enviar_correo_async(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 @app.route("/capturar_pago_paypal/<order_id>", methods=["POST"])
 def capturar_pago_paypal(order_id):
+    from app import app
 
-    # PAGO EN PAYPAL
+    #PAGO EN PAYPAL
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Basic " + base64.b64encode(
@@ -495,11 +501,11 @@ def capturar_pago_paypal(order_id):
 
     data = r.json()
 
-    # DATOS DEL CLIENTE
+    #DATOS DEL CLIENTE
     usuario_id = session["usuario_id"]
     usuario = Usuario.query.get(usuario_id)
 
-    # OBTENER CARRITO
+    #CARRITO
     carrito = Carrito.query.filter_by(usuario_id=usuario.id).first()
     items = carrito.items
 
@@ -525,7 +531,7 @@ def capturar_pago_paypal(order_id):
     db.session.add(nuevo_pedido)
     db.session.commit()
 
-    # GUARDAR ITEMS DEL PEDIDO
+    # GUARDAR ITEMS
     for item in items:
         pedido_item = PedidoItem(
             pedido_id=nuevo_pedido.id,
@@ -535,7 +541,6 @@ def capturar_pago_paypal(order_id):
         )
         db.session.add(pedido_item)
 
-        # DESCONTAR INVENTARIO
         producto = Producto.query.get(item.producto_id)
         producto.stock -= item.cantidad
 
@@ -545,7 +550,6 @@ def capturar_pago_paypal(order_id):
 
     db.session.commit()
 
-    # ENVIAR CORREO DE CONFIRMACION
     cuerpo = f"""
 Hola {usuario.nombre},
 
@@ -571,10 +575,13 @@ Productos comprados:
         recipients=[usuario.email],
         body=cuerpo
     )
-    mail.send(msg)
 
-    # RESPUESTA SEGURA PARA PAYPAL
-    return jsonify({"status": "COMPLETED"})
+    respuesta = jsonify({"status": "COMPLETED"})
+
+    Thread(target=enviar_correo_async, args=(app, msg)).start()
+
+    return respuesta
+
 
 @app.route("/pedido_exitoso")
 def pedido_exitoso():
