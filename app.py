@@ -564,7 +564,7 @@ Productos comprados:
     for item in items_copia:
         cuerpo += f"- {item['nombre']} x {item['cantidad']} (${item['precio']})\n"
 
-    cuerpo += "\n¡Gracias por tu compra!\nFerretería Online 🔧🧡"
+    cuerpo += "\n¡Gracias por tu compra!\nFerretería Watajai 🔧🧡"
 
     msg = Message(
         subject=f"Confirmación de compra #{nuevo_pedido.id}",
