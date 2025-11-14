@@ -482,6 +482,7 @@ def crear_orden_paypal():
 @app.route("/capturar_pago_paypal/<order_id>", methods=["POST"])
 def capturar_pago_paypal(order_id):
 
+    #PAGO EN PAYPAL
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Basic " + base64.b64encode(
@@ -494,26 +495,28 @@ def capturar_pago_paypal(order_id):
 
     data = r.json()
 
-    # Guardar EL PAGO
+    #DATOS DEL CLIENTE
     usuario_id = session["usuario_id"]
     usuario = Usuario.query.get(usuario_id)
-    carrito = Carrito.query.filter_by(usuario_id=usuario_id).first()
+
+    #OBTENER CARRITO
+    carrito = Carrito.query.filter_by(usuario_id=usuario.id).first()
     items = carrito.items
+    total = sum(item.cantidad * float(item.precio_unitario) for item in items)
 
-    total = sum(item.cantidad * float(item.precio_unitario) for item in carrito.items)
-
+    #GUARDAR PEDIDO
     nuevo_pedido = Pedido(
         usuario_id=usuario_id,
         total=total,
         estado="Pagado",
         metodo_pago="PayPal",
-        direccion_envio=Usuario.query.get(usuario_id).direccion
+        direccion_envio=usuario.direccion
     )
     db.session.add(nuevo_pedido)
     db.session.commit()
 
-    # Agregar items del pedido
-    for item in carrito.items:
+    # Guardar items del pedido
+    for item in items:
         pedido_item = PedidoItem(
             pedido_id=nuevo_pedido.id,
             producto_id=item.producto_id,
@@ -526,13 +529,13 @@ def capturar_pago_paypal(order_id):
         producto = Producto.query.get(item.producto_id)
         producto.stock -= item.cantidad
 
-    # Limpiar carrito
-    for item in carrito.items:
+    # Vaciar carrito
+    for item in items:
         db.session.delete(item)
 
     db.session.commit()
 
-    #Enviar correo de confirmacion
+    #ENVIAR CORREO DE CONFIRMACION
     cuerpo = f"""
 Hola {usuario.nombre},
 
@@ -561,6 +564,7 @@ Productos comprados:
     mail.send(msg)
 
     return jsonify({"status": "COMPLETED"})
+
 
 @app.route("/pedido_exitoso")
 def pedido_exitoso():
