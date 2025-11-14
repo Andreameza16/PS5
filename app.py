@@ -27,9 +27,9 @@ from models import Usuario, Producto, Carrito, CarritoItem, Pedido, PedidoItem
 app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'apikey'  # SIEMPRE es apikey
-app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")  # Tu API KEY
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")  # correo validado
+app.config['MAIL_USERNAME'] = 'apikey'
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")
 
 mail = Mail(app)
 from threading import Thread
