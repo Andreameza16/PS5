@@ -482,7 +482,7 @@ def crear_orden_paypal():
 @app.route("/capturar_pago_paypal/<order_id>", methods=["POST"])
 def capturar_pago_paypal(order_id):
 
-    #PAGO EN PAYPAL
+    # PAGO EN PAYPAL
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Basic " + base64.b64encode(
@@ -495,16 +495,26 @@ def capturar_pago_paypal(order_id):
 
     data = r.json()
 
-    #DATOS DEL CLIENTE
+    # DATOS DEL CLIENTE
     usuario_id = session["usuario_id"]
     usuario = Usuario.query.get(usuario_id)
 
-    #OBTENER CARRITO
+    # OBTENER CARRITO
     carrito = Carrito.query.filter_by(usuario_id=usuario.id).first()
     items = carrito.items
-    total = sum(item.cantidad * float(item.precio_unitario) for item in items)
 
-    #GUARDAR PEDIDO
+    items_copia = [
+        {
+            "nombre": item.producto.nombre,
+            "cantidad": item.cantidad,
+            "precio": float(item.precio_unitario)
+        }
+        for item in items
+    ]
+
+    total = sum(item["cantidad"] * item["precio"] for item in items_copia)
+
+    # GUARDAR PEDIDO
     nuevo_pedido = Pedido(
         usuario_id=usuario_id,
         total=total,
@@ -515,7 +525,7 @@ def capturar_pago_paypal(order_id):
     db.session.add(nuevo_pedido)
     db.session.commit()
 
-    # Guardar items del pedido
+    # GUARDAR ITEMS DEL PEDIDO
     for item in items:
         pedido_item = PedidoItem(
             pedido_id=nuevo_pedido.id,
@@ -525,17 +535,17 @@ def capturar_pago_paypal(order_id):
         )
         db.session.add(pedido_item)
 
-        # Descontar inventario
+        # DESCONTAR INVENTARIO
         producto = Producto.query.get(item.producto_id)
         producto.stock -= item.cantidad
 
-    # Vaciar carrito
+    # VACIAR CARRITO
     for item in items:
         db.session.delete(item)
 
     db.session.commit()
 
-    #ENVIAR CORREO DE CONFIRMACION
+    # ENVIAR CORREO DE CONFIRMACION
     cuerpo = f"""
 Hola {usuario.nombre},
 
@@ -551,8 +561,8 @@ Método de pago: PayPal
 Productos comprados:
 """
 
-    for item in items:
-        cuerpo += f"- {item.producto.nombre} x {item.cantidad} (${item.precio_unitario})\n"
+    for item in items_copia:
+        cuerpo += f"- {item['nombre']} x {item['cantidad']} (${item['precio']})\n"
 
     cuerpo += "\n¡Gracias por tu compra!\nFerretería Online 🔧🧡"
 
@@ -563,8 +573,8 @@ Productos comprados:
     )
     mail.send(msg)
 
+    # RESPUESTA SEGURA PARA PAYPAL
     return jsonify({"status": "COMPLETED"})
-
 
 @app.route("/pedido_exitoso")
 def pedido_exitoso():
