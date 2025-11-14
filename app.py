@@ -23,14 +23,20 @@ db.init_app(app)
 from models import Usuario, Producto, Carrito, CarritoItem, Pedido, PedidoItem
 
 # Configuracion de flask mail
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+# --- CONFIG SENDGRID ---
+app.config['MAIL_SERVER'] = 'smtp.sendgrid.net'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = os.getenv("MAIL_USERNAME")
-app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")
-app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_USERNAME")
+app.config['MAIL_USERNAME'] = 'apikey'  # SIEMPRE es apikey
+app.config['MAIL_PASSWORD'] = os.getenv("MAIL_PASSWORD")  # Tu API KEY
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv("MAIL_DEFAULT_SENDER")  # correo validado
 
 mail = Mail(app)
+from threading import Thread
+
+def enviar_correo_async(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 
 #RUTAS
@@ -43,6 +49,16 @@ def index():
         usuario = Usuario.query.get(session["usuario_id"])
 
     return render_template('index.html', productos=productos, usuario=usuario)
+
+@app.route("/test_sendgrid")
+def test_sendgrid():
+    msg = Message(
+        subject="Prueba SendGrid desde Railway",
+        recipients=["ironplayzyt@gmail.com"],
+        body="Todo funciona 🔥"
+    )
+    mail.send(msg)
+    return "Correo enviado"
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -478,17 +494,11 @@ def crear_orden_paypal():
                       json=cuerpo, headers=headers)
 
     return r.json()
-from threading import Thread
-
-def enviar_correo_async(app, msg):
-    with app.app_context():
-        mail.send(msg)
 
 @app.route("/capturar_pago_paypal/<order_id>", methods=["POST"])
 def capturar_pago_paypal(order_id):
     from app import app
 
-    #PAGO EN PAYPAL
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Basic " + base64.b64encode(
@@ -496,17 +506,24 @@ def capturar_pago_paypal(order_id):
         ).decode()
     }
 
-    r = requests.post(os.getenv("PAYPAL_API") + f"/v2/checkout/orders/{order_id}/capture",
-                      headers=headers)
+    try:
+        r = requests.post(
+            os.getenv("PAYPAL_API") + f"/v2/checkout/orders/{order_id}/capture",
+            headers=headers
+        )
+        data = r.json()
+    except Exception as e:
+        print("Error capturando pago PayPal:", e)
+        return jsonify({"status": "ERROR", "detalle": "Fallo en PayPal"}), 500
 
-    data = r.json()
-
-    #DATOS DEL CLIENTE
-    usuario_id = session["usuario_id"]
+    usuario_id = session.get("usuario_id")
     usuario = Usuario.query.get(usuario_id)
 
-    #CARRITO
     carrito = Carrito.query.filter_by(usuario_id=usuario.id).first()
+
+    if not carrito or not carrito.items:
+        return jsonify({"status": "ERROR", "detalle": "Carrito vacío"}), 400
+
     items = carrito.items
 
     items_copia = [
@@ -520,7 +537,6 @@ def capturar_pago_paypal(order_id):
 
     total = sum(item["cantidad"] * item["precio"] for item in items_copia)
 
-    # GUARDAR PEDIDO
     nuevo_pedido = Pedido(
         usuario_id=usuario_id,
         total=total,
@@ -531,7 +547,6 @@ def capturar_pago_paypal(order_id):
     db.session.add(nuevo_pedido)
     db.session.commit()
 
-    # GUARDAR ITEMS
     for item in items:
         pedido_item = PedidoItem(
             pedido_id=nuevo_pedido.id,
@@ -544,7 +559,6 @@ def capturar_pago_paypal(order_id):
         producto = Producto.query.get(item.producto_id)
         producto.stock -= item.cantidad
 
-    # VACIAR CARRITO
     for item in items:
         db.session.delete(item)
 
@@ -576,11 +590,9 @@ Productos comprados:
         body=cuerpo
     )
 
-    respuesta = jsonify({"status": "COMPLETED"})
-
     Thread(target=enviar_correo_async, args=(app, msg)).start()
 
-    return respuesta
+    return jsonify({"status": "COMPLETED"})
 
 
 @app.route("/pedido_exitoso")
@@ -593,34 +605,55 @@ def contacto():
 
 @app.route("/enviar_contacto", methods=["POST"])
 def enviar_contacto():
+    from app import app 
+
     nombre = request.form["nombre"]
     email = request.form["email"]
     mensaje = request.form["mensaje"]
 
-    # Mensaje que se envia al admin
-    cuerpo = f"""
-    Admin tienes un nuevo mensaje desde el formulario de contacto:
+    cuerpo_admin = f"""
+    Admin, has recibido un nuevo mensaje desde el formulario de contacto:
 
     Nombre: {nombre}
     Correo: {email}
+
     Mensaje:
     {mensaje}
+
+    -- Enviado desde Ferretería Watajai --
     """
 
-    msg = Message(
+    msg_admin = Message(
         subject="Nuevo mensaje de contacto",
-        recipients=[os.getenv("MAIL_USERNAME")],
-        body=cuerpo
+        recipients=[os.getenv("MAIL_DEFAULT_SENDER")], 
+        body=cuerpo_admin
     )
-    mail.send(msg)
 
-    # Mensaje de confirmacion al usuario
-    confirmacion = Message(
+    cuerpo_usuario = f"""
+Hola {nombre},
+
+Hemos recibido tu mensaje correctamente. 📩  
+Gracias por contactarte con Ferretería Watajai.
+
+Tu mensaje fue:
+---------------------------------------
+{mensaje}
+---------------------------------------
+
+Te responderemos lo más pronto posible.
+
+Saludos,
+Ferretería Watajai 🛠️🧡
+"""
+
+    msg_usuario = Message(
         subject="Hemos recibido tu mensaje",
         recipients=[email],
-        body=f"Hola {nombre},\n\nGracias por contactarnos. Te responderemos pronto.\n\nMensaje enviado:\n{mensaje}"
+        body=cuerpo_usuario
     )
-    mail.send(confirmacion)
+
+    Thread(target=enviar_correo_async, args=(app, msg_admin)).start()
+    Thread(target=enviar_correo_async, args=(app, msg_usuario)).start()
 
     return render_template("contacto_exitoso.html", nombre=nombre)
 
